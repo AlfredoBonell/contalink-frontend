@@ -5,6 +5,7 @@ import { Invoice } from './Invoice';
 
 import * as _moment from 'moment';
 import { Moment } from 'moment';
+import { HttpParams } from '@angular/common/http';
 
 const moment = _moment;
 
@@ -27,6 +28,8 @@ export class AppComponent implements OnInit {
 
   constructor(private restService: RestService) { }
 
+  response: any;
+  responseList = [];
   invoices: Invoice[] = [];
 
   startChange(event: { value: any; }) {
@@ -38,16 +41,30 @@ export class AppComponent implements OnInit {
     this.fechaFin = moment(event.value, "DD/MM/YYYY").format("YYYY-MM-DD");
     console.log("La fecha final es: " + this.fechaFin);
 
-    this.restService.getReporte(this.fechaInicio, this.fechaFin).subscribe(
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append("fechaInicio", this.fechaInicio);
+    queryParams = queryParams.append("fechaFin", this.fechaFin);
+
+    this.restService.getReporte(queryParams).subscribe(
       (res) => {
-        if (res.invoicesList.length > 0) {
-          this.invoices = res.invoicesList;
-          console.log(res);
+        this.response = res;
+        if(this.response.codigo_respuesta == 200){
+          this.responseList = this.response.invoicesList;
+          this.invoices = this.responseList;
         }
-        else {
+        else{
           alert("No hay facturas para mostrar");
-          this.invoices = res.invoicesList;
+          this.invoices = this.responseList;
         }
+        
+        // if (this.lis.length > 0) {
+        //   this.invoices = this.lis;
+        //   console.log(res);
+        // }
+        // else {
+        //   alert("No hay facturas para mostrar");
+        //   this.invoices = res.invoicesList;
+        // }
       },
       (err) => {
         console.log(err);
