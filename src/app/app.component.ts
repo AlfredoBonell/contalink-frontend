@@ -34,43 +34,45 @@ export class AppComponent implements OnInit {
 
   startChange(event: { value: any; }) {
     this.fechaInicio = moment(event.value, "DD/MM/YYYY").format("YYYY-MM-DD");
-    console.log("La fecha inicio es: " + this.fechaInicio);
   }
 
   endChange(event: { value: any; }) {
-    this.fechaFin = moment(event.value, "DD/MM/YYYY").format("YYYY-MM-DD");
-    console.log("La fecha final es: " + this.fechaFin);
+    this.fechaFin = moment(event.value, 'DD-MM-YYYY').format("YYYY-MM-DD");
 
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append("fechaInicio", this.fechaInicio);
-    queryParams = queryParams.append("fechaFin", this.fechaFin);
-
-    this.restService.getReporte(queryParams).subscribe(
-      (res) => {
-        this.response = res;
-        if(this.response.codigo_respuesta == 200){
-          this.responseList = this.response.invoicesList;
-          this.invoices = this.responseList;
+    if(moment(moment(this.fechaInicio).format('DD-MM-YYYY'), 'DD-MM-YYYY', true).isValid() && moment(moment(this.fechaFin).format('DD-MM-YYYY'), 'DD-MM-YYYY', true).isValid()){
+      
+      let queryParams = new HttpParams();
+      queryParams = queryParams.append("fechaInicio", this.fechaInicio);
+      queryParams = queryParams.append("fechaFin", this.fechaFin);
+  
+      this.restService.getReporte(queryParams).subscribe(
+        (res) => {
+          this.response = res;
+          if(this.response.codigo_respuesta == 200){
+            this.responseList = this.response.invoicesList;
+            this.invoices = this.responseList;
+          }
+          else{
+            alert("No hay facturas para mostrar");
+            this.responseList = this.response.invoicesList;
+            this.invoices = this.responseList;
+          }
+          
+          // if (this.lis.length > 0) {
+          //   this.invoices = this.lis;
+          //   console.log(res);
+          // }
+          // else {
+          //   alert("No hay facturas para mostrar");
+          //   this.invoices = res.invoicesList;
+          // }
+        },
+        (err) => {
+          console.log(err);
+          alert("Error al obtener las facturas");
         }
-        else{
-          alert("No hay facturas para mostrar");
-          this.invoices = this.responseList;
-        }
-        
-        // if (this.lis.length > 0) {
-        //   this.invoices = this.lis;
-        //   console.log(res);
-        // }
-        // else {
-        //   alert("No hay facturas para mostrar");
-        //   this.invoices = res.invoicesList;
-        // }
-      },
-      (err) => {
-        console.log(err);
-        alert("Error al obtener las facturas");
-      }
-    )
+      )
+    }
   }
 
   ngOnInit(): void {
